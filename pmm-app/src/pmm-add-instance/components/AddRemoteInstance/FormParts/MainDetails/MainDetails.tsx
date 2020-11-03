@@ -12,7 +12,7 @@ export const MainDetailsFormPart: FC<MainDetailsFormPartProps> = ({ remoteInstan
 
   return (
     <div className={styles.groupWrapper}>
-      <h5>{Messages.form.titles.mainDetails}</h5>
+      <h4 className={styles.sectionHeader}>{Messages.form.titles.mainDetails}</h4>
       <TextInputField
         name="address"
         label={Messages.form.labels.mainDetails.address}

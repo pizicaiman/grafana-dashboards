@@ -8,4 +8,8 @@ export const getStyles = stylesFactory(() => ({
   addServiceButton: css`
     margin-top: 30px;
   `,
+  sectionHeader: css`
+    margin-top: 15px;
+    margin-bottom: 15px;
+  `,
 }));
