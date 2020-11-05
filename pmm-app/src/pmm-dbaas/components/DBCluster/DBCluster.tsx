@@ -8,12 +8,9 @@ import { AddClusterButton } from '../AddClusterButton/AddClusterButton';
 import { getStyles } from './DBCluster.styles';
 import { DBCluster as Cluster, DBClusterProps } from './DBCluster.types';
 import { AddDBClusterModal } from './AddDBClusterModal/AddDBClusterModal';
+import { EditDBClusterModal } from './EditDBClusterModal/EditDBClusterModal';
 import { useDBClusters } from './DBCluster.hooks';
-import {
-  clusterStatusRender,
-  connectionRender,
-  databaseTypeRender,
-} from './ColumnRenderers/ColumnRenderers';
+import { clusterStatusRender, connectionRender, databaseTypeRender } from './ColumnRenderers/ColumnRenderers';
 import { DeleteDBClusterModal } from './DeleteDBClusterModal/DeleteDBClusterModal';
 import { isClusterChanging } from './DBCluster.utils';
 
@@ -21,6 +18,7 @@ export const DBCluster: FC<DBClusterProps> = ({ kubernetes }) => {
   const styles = useStyles(getStyles);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedCluster, setSelectedCluster] = useState<Cluster>();
   const [dbClusters, getDBClusters, loading] = useDBClusters(kubernetes);
 
@@ -59,6 +57,19 @@ export const DBCluster: FC<DBClusterProps> = ({ kubernetes }) => {
             >
               {Messages.dbcluster.table.actions.deleteCluster}
             </Button>
+            <Button
+              size="md"
+              onClick={() => {
+                setSelectedCluster(element);
+                setEditModalVisible(true);
+              }}
+              icon="edit"
+              variant="primary"
+              data-qa="open-edit-modal-button"
+              disabled={isClusterChanging(element)}
+            >
+              Edit cluster
+            </Button>
           </div>
         ),
       },
@@ -95,6 +106,12 @@ export const DBCluster: FC<DBClusterProps> = ({ kubernetes }) => {
       <DeleteDBClusterModal
         isVisible={deleteModalVisible}
         setVisible={setDeleteModalVisible}
+        onClusterDeleted={getDBClusters}
+        selectedCluster={selectedCluster}
+      />
+      <EditDBClusterModal
+        isVisible={editModalVisible}
+        setVisible={setEditModalVisible}
         onClusterDeleted={getDBClusters}
         selectedCluster={selectedCluster}
       />

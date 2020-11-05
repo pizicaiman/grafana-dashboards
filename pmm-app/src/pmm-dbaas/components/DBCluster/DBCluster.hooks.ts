@@ -2,19 +2,16 @@ import { useState, useEffect } from 'react';
 import { processPromiseResults, FulfilledPromiseResult } from 'shared/components/helpers/promises';
 import { Databases } from 'shared/core';
 import { Kubernetes } from '../Kubernetes/Kubernetes.types';
-import { DBCluster, GetDBClustersAction, DBClusterPayload } from './DBCluster.types';
+import {
+  DBCluster, GetDBClustersAction, DBClusterPayload,
+} from './DBCluster.types';
 import { isClusterChanging } from './DBCluster.utils';
 import { DBClusterServiceFactory } from './DBClusterService.factory';
 
 const RECHECK_INTERVAL = 30000;
-const DATABASES = [
-  Databases.mysql,
-  Databases.mongodb,
-];
+const DATABASES = [Databases.mysql, Databases.mongodb];
 
-export const useDBClusters = (
-  kubernetes: Kubernetes[],
-): [DBCluster[], GetDBClustersAction, boolean] => {
+export const useDBClusters = (kubernetes: Kubernetes[]): [DBCluster[], GetDBClustersAction, boolean] => {
   const [dbClusters, setDBClusters] = useState<DBCluster[]>([]);
   const [loading, setLoading] = useState(false);
   let timer: NodeJS.Timeout;
@@ -66,15 +63,30 @@ const getClusters = async (kubernetes: Kubernetes[], databaseType: Databases): P
       return acc;
     }
 
-    const clusters: DBClusterPayload[] = (r as FulfilledPromiseResult).value?.clusters ?? [];
+    const clusters2: DBClusterPayload[] = (r as FulfilledPromiseResult).value?.clusters ?? [];
 
-    const resultClusters = clusters.map(
-      (cluster) => dbClusterService.toModel(
-        cluster,
-        kubernetes[index].kubernetesClusterName,
-        databaseType,
-      ),
-    );
+    console.log(clusters2);
+    const clusters: DBClusterPayload[] = [
+      {
+        kubernetes_cluster_name: 'string',
+        name: 'Testerok',
+        state: 'pending',
+        operation: {},
+        params: {
+          cluster_size: 1,
+          pxc: {
+            compute_resources: {
+              cpu_m: 10000,
+              memory_bytes: 2000000000000,
+              disk_size: 25,
+            },
+          },
+        },
+      },
+    ];
+
+    // eslint-disable-next-line max-len
+    const resultClusters = clusters.map((cluster) => dbClusterService.toModel(cluster, kubernetes[index].kubernetesClusterName, databaseType));
 
     return acc.concat(resultClusters);
   }, []);

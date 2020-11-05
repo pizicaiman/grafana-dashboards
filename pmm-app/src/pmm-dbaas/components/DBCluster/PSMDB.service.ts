@@ -21,13 +21,36 @@ const DBCLUSTER_STATUS_MAP = {
 };
 
 export class PSMDBService extends DBClusterService {
-  getDBClusters(kubernetes: Kubernetes): Promise<DBClusterPayload> {
+  async getDBClusters(kubernetes: Kubernetes): Promise<DBClusterPayload> {
     return apiRequestManagement.post<any, Kubernetes>('/DBaaS/PSMDBClusters/List', kubernetes);
   }
 
   addDBCluster(dbCluster: DBCluster): Promise<void | DBClusterPayload> {
     return apiRequestManagement.post<DBClusterPayload, any>(
       '/DBaaS/PSMDBCluster/Create',
+      toAPI(dbCluster),
+    );
+  }
+
+  updateDBCluster(dbCluster: DBCluster): Promise<void | DBClusterPayload> {
+    const toAPI = (cluster: DBCluster) => ({
+      kubernetes_cluster_name: cluster.kubernetesClusterName,
+      name: cluster.clusterName,
+      params: {
+        cluster_size: cluster.clusterSize,
+        replicaset: {
+          compute_resources: {
+            cpu_m: cluster.cpu * 1000,
+            memory_bytes: cluster.memory * 10 ** 9,
+            // disk_size units - Gigabytes
+            disk_size: Number(cluster.disk),
+          },
+        },
+      },
+    });
+
+    return apiRequestManagement.post<DBClusterPayload, any>(
+      '/DBaaS/PSMDBCluster/Update',
       toAPI(dbCluster),
     );
   }
@@ -61,9 +84,9 @@ export class PSMDBService extends DBClusterService {
       kubernetesClusterName,
       databaseType,
       clusterSize: dbCluster.params.cluster_size,
-      memory: dbCluster.params.replicaset?.compute_resources?.memory_bytes || 0,
-      cpu: dbCluster.params.replicaset?.compute_resources?.cpu_m || 0,
-      disk: dbCluster.params.replicaset?.compute_resources?.disk_size || 0,
+      memory: (dbCluster.params.replicaset?.compute_resources?.memory_bytes || 0) / 10 ** 9,
+      cpu: (dbCluster.params.replicaset?.compute_resources?.cpu_m || 0) / 1000,
+      disk: (dbCluster.params.replicaset?.compute_resources?.disk_size || 0),
       status: getClusterStatus(dbCluster.state, DBCLUSTER_STATUS_MAP),
       errorMessage: dbCluster.operation?.message,
     };

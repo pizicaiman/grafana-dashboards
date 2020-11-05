@@ -21,13 +21,36 @@ const DBCLUSTER_STATUS_MAP = {
 };
 
 export class XtraDBService extends DBClusterService {
-  getDBClusters(kubernetes: Kubernetes): Promise<DBClusterPayload> {
+  async getDBClusters(kubernetes: Kubernetes): Promise<DBClusterPayload> {
     return apiRequestManagement.post<any, Kubernetes>('/DBaaS/XtraDBClusters/List', kubernetes);
   }
 
   addDBCluster(dbCluster: DBCluster): Promise<void | DBClusterPayload> {
     return apiRequestManagement.post<DBClusterPayload, any>(
       '/DBaaS/XtraDBCluster/Create',
+      toAPI(dbCluster),
+    );
+  }
+
+  updateDBCluster(dbCluster: DBCluster): Promise<void | DBClusterPayload> {
+    const toAPI = (cluster: DBCluster) => ({
+      kubernetes_cluster_name: cluster.kubernetesClusterName,
+      name: cluster.clusterName,
+      params: {
+        cluster_size: cluster.clusterSize,
+        replicaset: {
+          compute_resources: {
+            cpu_m: cluster.cpu * 1000,
+            memory_bytes: cluster.memory * 10 ** 9,
+            // disk_size units - Gigabytes
+            disk_size: Number(cluster.disk),
+          },
+        },
+      },
+    });
+
+    return apiRequestManagement.post<DBClusterPayload, any>(
+      '/DBaaS/XtraDBCluster/Update',
       toAPI(dbCluster),
     );
   }
@@ -61,8 +84,8 @@ export class XtraDBService extends DBClusterService {
       kubernetesClusterName,
       databaseType,
       clusterSize: dbCluster.params.cluster_size,
-      memory: dbCluster.params.pxc?.compute_resources?.memory_bytes || 0,
-      cpu: dbCluster.params.pxc?.compute_resources?.cpu_m || 0,
+      memory: (dbCluster.params.pxc?.compute_resources?.memory_bytes || 0) / 10 ** 9,
+      cpu: (dbCluster.params.pxc?.compute_resources?.cpu_m || 0) / 1000,
       disk: dbCluster.params.pxc?.compute_resources?.disk_size || 0,
       status: getClusterStatus(dbCluster.state, DBCLUSTER_STATUS_MAP),
       errorMessage: dbCluster.operation?.message,
