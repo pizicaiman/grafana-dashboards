@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { processPromiseResults, FulfilledPromiseResult } from 'shared/components/helpers/promises';
+import { useEffect, useState } from 'react';
+import { FulfilledPromiseResult, processPromiseResults } from 'shared/components/helpers/promises';
 import { Databases } from 'shared/core';
 import { Kubernetes } from '../Kubernetes/Kubernetes.types';
 import {
-  DBCluster, GetDBClustersAction, DBClusterPayload,
+  DBCluster, DBClusterPayload, DBClusterStatus, GetDBClustersAction,
 } from './DBCluster.types';
 import { isClusterChanging } from './DBCluster.utils';
 import { DBClusterServiceFactory } from './DBClusterService.factory';
@@ -66,12 +66,16 @@ const getClusters = async (kubernetes: Kubernetes[], databaseType: Databases): P
     const clusters2: DBClusterPayload[] = (r as FulfilledPromiseResult).value?.clusters ?? [];
 
     console.log(clusters2);
+    // @ts-ignore
     const clusters: DBClusterPayload[] = [
       {
         kubernetes_cluster_name: 'string',
         name: 'Testerok',
-        state: 'pending',
-        operation: {},
+        state: DBClusterStatus.ready,
+        operation: {
+          progress: 3,
+          message: 'test',
+        },
         params: {
           cluster_size: 1,
           pxc: {
