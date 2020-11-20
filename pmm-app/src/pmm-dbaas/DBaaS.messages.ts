@@ -95,6 +95,7 @@ export const Messages = {
       },
       actions: {
         deleteCluster: 'Delete',
+        restartCluster: 'Restart',
         editCluster: 'Edit',
       },
       status: {
