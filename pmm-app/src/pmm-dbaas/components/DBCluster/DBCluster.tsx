@@ -1,8 +1,14 @@
 import React, {
-  FC, useCallback, useMemo, useState,
+  FC,
+  useCallback,
+  useMemo,
+  useState,
+  useEffect,
 } from 'react';
 import { Button, useStyles } from '@grafana/ui';
 import { Table } from 'shared/components/Elements/Table/Table';
+import { Settings } from 'pmm-settings/Settings.types';
+import { SettingsService } from 'pmm-settings/Settings.service';
 import { Messages } from 'pmm-dbaas/DBaaS.messages';
 import { AddClusterButton } from '../AddClusterButton/AddClusterButton';
 import { getStyles } from './DBCluster.styles';
@@ -18,7 +24,7 @@ import {
   clusterNameRender,
 } from './ColumnRenderers/ColumnRenderers';
 import { DeleteDBClusterModal } from './DeleteDBClusterModal/DeleteDBClusterModal';
-import { isClusterChanging } from './DBCluster.utils';
+import { isClusterChanging, buildWarningMessage } from './DBCluster.utils';
 
 export const DBCluster: FC<DBClusterProps> = ({ kubernetes }) => {
   const styles = useStyles(getStyles);
@@ -27,6 +33,8 @@ export const DBCluster: FC<DBClusterProps> = ({ kubernetes }) => {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedCluster, setSelectedCluster] = useState<Cluster>();
   const [dbClusters, getDBClusters, loading] = useDBClusters(kubernetes);
+  const [settings, setSettings] = useState<Settings>();
+  const [settingsLoading, setSettingsLoading] = useState(true);
 
   const columns = useMemo(
     () => [
@@ -96,12 +104,20 @@ export const DBCluster: FC<DBClusterProps> = ({ kubernetes }) => {
     () => (
       <AddClusterButton
         label={Messages.dbcluster.addAction}
+        disabled={settingsLoading || !settings?.publicAddress}
+        showWarning={!settingsLoading && !settings?.publicAddress}
+        warningMessage={buildWarningMessage(styles.settingsLink)}
         action={() => setAddModalVisible(!addModalVisible)}
         data-qa="dbcluster-add-cluster-button"
       />
     ),
-    [addModalVisible],
+    [addModalVisible, settingsLoading, settings],
   );
+  const getSettings = useCallback(() => {
+    SettingsService.getSettings(setSettingsLoading, setSettings);
+  }, []);
+
+  useEffect(() => getSettings(), []);
 
   return (
     <div className={styles.tableWrapper}>

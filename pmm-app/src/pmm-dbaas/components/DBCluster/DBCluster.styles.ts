@@ -14,6 +14,12 @@ export const getStyles = (theme: GrafanaTheme) => ({
   tableWrapper: css`
     padding: ${theme.spacing.md};
   `,
+  settingsLink: css`
+    color: ${theme.colors.linkExternal};
+    &:hover {
+      color: ${theme.colors.linkExternal};
+    }
+  `,
   actionButton: css`
     margin-left: 10px;
   `,
