@@ -25,7 +25,7 @@ import {
   clusterActionsRender,
 } from './ColumnRenderers/ColumnRenderers';
 import { DeleteDBClusterModal } from './DeleteDBClusterModal/DeleteDBClusterModal';
-import { isClusterChanging, buildWarningMessage } from './DBCluster.utils';
+import { buildWarningMessage } from './DBCluster.utils';
 
 export const DBCluster: FC<DBClusterProps> = ({ kubernetes }) => {
   const styles = useStyles(getStyles);
@@ -64,6 +64,7 @@ export const DBCluster: FC<DBClusterProps> = ({ kubernetes }) => {
         accessor: clusterActionsRender({
           setSelectedCluster,
           setDeleteModalVisible,
+          setEditModalVisible,
           getDBClusters,
         }),
       },

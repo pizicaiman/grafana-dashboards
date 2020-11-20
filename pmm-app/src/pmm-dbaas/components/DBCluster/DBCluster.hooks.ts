@@ -3,7 +3,6 @@ import { FulfilledPromiseResult, processPromiseResults } from 'shared/components
 import { Databases } from 'shared/core';
 import { Kubernetes } from '../Kubernetes/Kubernetes.types';
 import { DBCluster, GetDBClustersAction, DBClusterPayload } from './DBCluster.types';
-import { isClusterChanging } from './DBCluster.utils';
 import { DBClusterServiceFactory } from './DBClusterService.factory';
 
 const RECHECK_INTERVAL = 10000;
